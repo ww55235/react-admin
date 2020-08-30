@@ -2,7 +2,9 @@ import React, { Component, Fragment } from "react";
 
 import { Redirect, Switch, Route } from "react-router-dom";
 
-import memoryUtils from "../../utils/memoryUtils";
+//import memoryUtils from "../../utils/memoryUtils";
+
+import { connect } from "react-redux";
 
 import { Layout } from "antd";
 import Header from "../../components/header/Header";
@@ -18,14 +20,17 @@ import User from "../user/User";
 import Bar from "../charts/Bar";
 import Line from "../charts/Line";
 import Pie from "../charts/Pie";
+import NotFound from "../notFound/NotFound";
 
 const { Footer, Sider, Content } = Layout;
 
-export default class Admin extends Component {
+class Admin extends Component {
   render() {
     // console.log("render()");
     //console.log(memoryUtils);
-    const { user } = memoryUtils;
+    //const { user } = memoryUtils;
+
+    const { user } = this.props;
 
     //读取数据
 
@@ -44,6 +49,7 @@ export default class Admin extends Component {
             <Header></Header>
             <Content style={{ margin: 20, backgroundColor: "#fff" }}>
               <Switch>
+                <Redirect exact from="/" to="/home" />
                 <Route path="/home" component={Home} />
                 <Route path="/category" component={Category} />
                 <Route path="/role" component={Role} />
@@ -52,7 +58,7 @@ export default class Admin extends Component {
                 <Route path="/charts/bar" component={Bar} />
                 <Route path="/charts/pie" component={Pie} />
                 <Route path="/charts/line" component={Line} />
-                <Redirect to="/home" />
+                <Route component={NotFound} />
               </Switch>
             </Content>
             <Footer style={{ textAlign: "center", color: "#ccc" }}>
@@ -64,3 +70,9 @@ export default class Admin extends Component {
     );
   }
 }
+export default connect(
+  (state) => ({
+    user: state.user,
+  }),
+  {}
+)(Admin);
