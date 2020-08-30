@@ -1,15 +1,26 @@
 import React, { Component } from "react";
+
 import "./index.less";
+
 import dateFormate from "../../filters/dateFormate";
-import memoryUtils from "../../utils/memoryUtils";
-import storageUtils from "../../utils/storageUtils";
+
+//import memoryUtils from "../../utils/memoryUtils";
+
+//import storageUtils from "../../utils/storageUtils";
+
 import menuList from "../../config/menuConfig";
+
 import { reqWeather } from "../../api/index";
+
 import { withRouter } from "react-router-dom";
 
 import LinkButton from "../linkButton/LinkButton";
 
+import { connect } from "react-redux";
+
 import { Modal } from "antd";
+
+import { loginOut } from "../../redux/createActions";
 
 const { confirm } = Modal;
 
@@ -89,19 +100,24 @@ class Header extends Component {
       cancelText: "取消",
       onOk() {
         //删除本地存储
-        storageUtils.removeUser();
+        //storageUtils.removeUser();
         //删除内存中用户信息
-        memoryUtils.user = {};
-        _this.props.history.replace("/login");
+        // memoryUtils.user = {};
+        // this.props.user = {};
+        _this.props.loginOut();
+        //_this.props.history.replace("/login");
       },
     });
   };
 
   render() {
     //获取title
-    const title = this.getTitle();
+    //const title = this.getTitle();
+    const title = this.props.headerTitle;
     const { currentTime, weather, dayPictureUrl } = this.state;
-    const { username } = memoryUtils.user;
+    //const { username } = memoryUtils.user;
+    const { username } = this.props.user;
+
     return (
       <div className="Header">
         <div className="header-top">
@@ -124,4 +140,10 @@ class Header extends Component {
   }
 }
 
-export default withRouter(Header);
+export default connect(
+  (state) => ({
+    headerTitle: state.headerTitle,
+    user: state.user,
+  }),
+  { loginOut }
+)(withRouter(Header));

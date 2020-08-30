@@ -1,13 +1,17 @@
 import React, { Component } from "react";
 
 //导图antd组件
-import { Form, Icon, Input, Button, message } from "antd";
+import { Form, Icon, Input, Button } from "antd";
 
-import { reqLogin } from "../../api/index";
+// import { reqLogin } from "../../api/index";
 
-import memoryUtils from "../../utils/memoryUtils";
+//import memoryUtils from "../../utils/memoryUtils";
 
-import storageUtils from "../../utils/storageUtils";
+//import storageUtils from "../../utils/storageUtils";
+
+import { login } from "../../redux/createActions";
+
+import { connect } from "react-redux";
 
 import { Redirect } from "react-router-dom";
 //导入logo图片
@@ -40,27 +44,27 @@ class Login extends Component {
       const { username, password } = values;
       //如果验证通过
       if (!err) {
-        //console.log("校验成功", values);
-        const result = await reqLogin(username, password);
-        //console.log(response.data);
+        this.props.login(username, password);
 
-        //成功的状态
-        if (result.status === 0) {
-          message.success("登陆成功");
-          //console.log(result);
-          const user = result.data;
-          //console.log(user);
-          //保存在内存中
-          memoryUtils.user = user;
-          //存储到本地(local)中
-          storageUtils.saveUser(user);
-
-          //跳转到管理界面,登陆后不需要进行回退，所以使用replace
-          this.props.history.replace("/");
-        } else {
-          //失败
-          message.error(result.msg);
-        }
+        // //console.log("校验成功", values);
+        // const result = await reqLogin(username, password);
+        // //console.log(response.data);
+        // //成功的状态
+        // if (result.status === 0) {
+        //   message.success("登陆成功");
+        //   //console.log(result);
+        //   const user = result.data;
+        //   //console.log(user);
+        //   //保存在内存中
+        //   memoryUtils.user = user;
+        //   //存储到本地(local)中
+        //   storageUtils.saveUser(user);
+        //   //跳转到管理界面,登陆后不需要进行回退，所以使用replace
+        //   this.props.history.replace("/home");
+        // } else {
+        //   //失败
+        //   message.error(result.msg);
+        // }
       } else {
         console.log("校验失败");
       }
@@ -73,12 +77,15 @@ class Login extends Component {
   };
   render() {
     //console.log(memoryUtils);
-    const { user } = memoryUtils; //{}
+    //const { user } = memoryUtils; //{}
+    const user = this.props.user;
     //console.log(user);
     //判断有没有值
     if (user && user._id) {
-      return <Redirect to="/" />;
+      return <Redirect to="/home" />;
     }
+
+    const errorMsg = this.props.user.errorMsg;
 
     //得到传过来的form对象
     const form = this.props.form;
@@ -89,7 +96,18 @@ class Login extends Component {
           <img className="logo" src={logo} alt="logo" />
           <h1 className="title">React项目:后台管理系统</h1>
         </header>
-        <section className="login-content">
+        <section className="login-content" style={{ position: "relative" }}>
+          <h2
+            style={{
+              backgroundColor: "red",
+              textAlign: "center",
+              position: "absolute",
+              left: "40%",
+              top: 0,
+            }}
+          >
+            {errorMsg}
+          </h2>
           <h1>用户登陆</h1>
           <Form onSubmit={this.handleSubmit} className="login-form">
             <Form.Item>
@@ -148,4 +166,4 @@ class Login extends Component {
 }
 const Wripper = Form.create()(Login);
 
-export default Wripper;
+export default connect((state) => ({ user: state.user }), { login })(Wripper);

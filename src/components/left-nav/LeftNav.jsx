@@ -10,7 +10,11 @@ import menuList from "../../config/menuConfig";
 
 import { Menu, Icon } from "antd";
 
-import memoryUtils from "../../utils/memoryUtils";
+//import memoryUtils from "../../utils/memoryUtils";
+
+import { connect } from "react-redux";
+
+import { set_header_title } from "../../redux/createActions";
 
 const { SubMenu } = Menu;
 
@@ -19,9 +23,13 @@ class LeftNav extends Component {
   hasAuth = (item) => {
     //console.log(item);
     const { key, isPublic } = item;
-    const username = memoryUtils.user.username;
-    // console.log(username);
-    const menus = memoryUtils.user.role.menus;
+    // const username = memoryUtils.user.username;
+    //  console.log(username);
+    // const menus = memoryUtils.user.role.menus;
+
+    const username = this.props.user.username;
+
+    const menus = this.props.user.role.menus;
     //如果用户名为 admin 或者 用户权限中包含了 isPublic字段 或者权限中包含了key
     if (username === "admin" || isPublic || menus.includes(key)) {
       return true;
@@ -34,21 +42,27 @@ class LeftNav extends Component {
 
   //动态生成menu函数
   getMenuList = (menuList) => {
+    const { pathname } = this.props.history.location;
     //遍历数组 mentList [{},{}]
     return menuList.map((item) => {
       //判断是否有权限
       if (this.hasAuth(item)) {
         if (!item.children) {
+          if (item.key === pathname || pathname.startsWith(item.key)) {
+            this.props.set_header_title(item.title);
+          }
           return (
             <Menu.Item key={item.key}>
-              <Link to={item.key}>
+              <Link
+                to={item.key}
+                onClick={() => this.props.set_header_title(item.title)}
+              >
                 <Icon type={item.icon} />
                 <span>{item.title}</span>
               </Link>
             </Menu.Item>
           );
         } else {
-          const { pathname } = this.props.history.location;
           const childrenItem = item.children.find((childrenItem) =>
             pathname.startsWith(childrenItem.key)
           );
@@ -109,4 +123,9 @@ class LeftNav extends Component {
   }
 }
 
-export default withRouter(LeftNav);
+export default connect(
+  (state) => ({
+    user: state.user,
+  }),
+  { set_header_title }
+)(withRouter(LeftNav));

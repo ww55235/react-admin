@@ -12,11 +12,15 @@ import { reqGetRoles, reqAddRole, reqUpdateRole } from "../../api/index";
 
 import dateFormate from "../../filters/dateFormate";
 
-import memoryUtils from "../../utils/memoryUtils";
+// import memoryUtils from "../../utils/memoryUtils";
 
-import storageUtils from "../../utils/storageUtils";
+// import storageUtils from "../../utils/storageUtils";
 
-export default class Role extends Component {
+import { connect } from "react-redux";
+
+import { loginOut } from "../../redux/createActions";
+
+class Role extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -107,7 +111,7 @@ export default class Role extends Component {
     //console.log(getAuthMenu);
     const { role } = this.state;
     role.menus = getAuthMenu;
-    role.auth_name = memoryUtils.user.username;
+    role.auth_name = this.props.user.username;
     role.auth_time = Date.now(); //获取当前时间的时间戳
     //console.log(role);
     //发送ajax请求更新后端数据
@@ -115,13 +119,14 @@ export default class Role extends Component {
     //更新成功
     if (result.status === 0) {
       //console.log(memoryUtils.user.role_id);
-      if (role._id === memoryUtils.user.role_id) {
+      if (role._id === this.props.user.role_id) {
         //清除内存中的数据
-        memoryUtils.user = {};
+        // memoryUtils.user = {};
         //清除本地缓存的数据
-        storageUtils.removeUser();
+        // storageUtils.removeUser();
         //跳转到登录接秒
-        this.props.history.replace("/login");
+        //this.props.history.replace("/login");
+        this.props.loginOut();
         message.success("当前用户权限更新成功，请重新登陆");
       } else {
         //从后端获取更新后的数据 如果更新的不是自身的权限
@@ -217,3 +222,10 @@ export default class Role extends Component {
     );
   }
 }
+
+export default connect(
+  (state) => ({
+    user: state.user,
+  }),
+  { loginOut }
+)(Role);
